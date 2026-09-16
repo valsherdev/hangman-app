@@ -52,4 +52,10 @@ class HangmanViewModel: ViewModel() {
             usedLives++
         }
     }
+
+    fun restart() {
+        targetWord = hangmanWords.random()
+        guessedLetters = setOf<Char>()
+        usedLives = 0
+    }
 }

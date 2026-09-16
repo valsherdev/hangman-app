@@ -30,11 +30,27 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
             modifier = Modifier.padding(top = 16.dp)
         )
 
+        Text(
+            text = "Your guessed letters: ${viewModel.guessedLetters.sorted().joinToString(", ")}",
+            modifier = Modifier.padding(top = 8.dp)
+        )
+
         if (viewModel.isGameOver()) {
             Text(
                 text = if (viewModel.isWon()) "You won!" else "You lost! The word was: ${viewModel.targetWord}",
                 modifier = Modifier.padding(top = 24.dp)
             )
+
+            Button(
+                onClick = {
+                    viewModel.restart()
+                    letterInput = ""
+                          },
+                modifier = Modifier.padding(top = 16.dp)
+            ){
+                Text("Play again")
+            }
+
         } else {
             TextField(
                 value = letterInput,
