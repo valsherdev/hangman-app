@@ -170,7 +170,7 @@ fun HangmanDrawing(
             drawLine(
                 color = hangmanColor,
                 start = Offset(size.width * 0.65f, 155f),
-                end = Offset(size.width * 0.57f, 180f),
+                end = Offset(size.width * 0.57f, 175f),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
@@ -180,7 +180,7 @@ fun HangmanDrawing(
             drawLine(
                 color = hangmanColor,
                 start = Offset(size.width * 0.65f, 155f),
-                end = Offset(size.width * 0.73f, 180f),
+                end = Offset(size.width * 0.73f, 175f),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
