@@ -1,13 +1,17 @@
 package com.example.hangman
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 
-class HangmanViewModel: ViewModel() {
+class HangmanViewModel(application: Application) : AndroidViewModel(application) {
 
-    var targetWord by mutableStateOf(hangmanWords.random())
+
+    private val words: List<String> = loadWords()
+    var targetWord by mutableStateOf(words.random())
 
     val maxLives = 6
     var usedLives by mutableStateOf(0)
@@ -16,6 +20,14 @@ class HangmanViewModel: ViewModel() {
     var guessedLetters by mutableStateOf(setOf<Char>())
         private set
 
+
+    // loading words from raw resource
+    private fun loadWords(): List<String> {
+        val inputStream = getApplication<Application>().resources.openRawResource(R.raw.words)
+        return inputStream.bufferedReader().readLines()
+            .map { it.trim().lowercase() }
+            .filter { it.isNotEmpty() }
+    }
 
     fun getDisplayWord(): String {
         return targetWord
@@ -54,7 +66,7 @@ class HangmanViewModel: ViewModel() {
     }
 
     fun restart() {
-        targetWord = hangmanWords.random()
+        targetWord = words.random()
         guessedLetters = setOf<Char>()
         usedLives = 0
     }
