@@ -101,7 +101,12 @@ class HangmanViewModel(application: Application) : AndroidViewModel(application)
 
         if (availableLetters.isEmpty()) return
 
-        val hintLetter = availableLetters.random()
+        val singleOccurrenceLetters = availableLetters.filter { letter ->
+            targetWord.count { it == letter } == 1
+        }
+        val hintPool = singleOccurrenceLetters.ifEmpty { availableLetters }
+
+        val hintLetter = hintPool.random()
 
         guessedLetters = guessedLetters + hintLetter
         usedLives++
