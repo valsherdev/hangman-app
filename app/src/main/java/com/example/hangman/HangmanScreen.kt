@@ -25,12 +25,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.layout.width
 
 
 private const val ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 @Composable
 fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
     var pendingLetter by remember { mutableStateOf<Char?>(null) }
+    var showHintInfo by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(40.dp)) {
 
@@ -66,6 +69,30 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
             modifier = Modifier.padding(top = 16.dp)
         )
 
+        if (showHintInfo) {
+            AlertDialog(
+                onDismissRequest = {
+                    showHintInfo = false
+                },
+                title = {
+                    Text("How hints work")
+                },
+                text = {
+                    Text("A hint reveals one random letter from the word. " +
+                            "Using a hint costs one heart. " +
+                            "You only have 1 hint.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showHintInfo = false
+                        }
+                    ) {
+                        Text("Got it")
+                    }
+                }
+            )
+        }
 
         if (viewModel.isGameOver()) {
             Text(
@@ -77,18 +104,46 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
                 onClick = {
                     viewModel.restart()
                     pendingLetter = null
-                          },
+                },
                 modifier = Modifier.padding(top = 16.dp)
-            ){
+            ) {
                 Text("Play again")
             }
 
-        } else
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
+            ) {
+                Button(
+                    onClick = {
+                        viewModel.useHint()
+                    },
+                    enabled = !viewModel.hintUsed &&
+                            viewModel.getLivesRemaining() > 0,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("💡 Hint")
+                }
+
+                Button(
+                    onClick = {
+                        showHintInfo = true
+                    },
+                    modifier = Modifier.padding(start = 8.dp).width(50.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Text("ⓘ",
+                        fontSize = 22.sp)
+                }
+            }
+
             OnScreenKeyboard(
                 viewModel = viewModel,
                 pendingLetter = pendingLetter,
                 onLetterTap = { pendingLetter = it },
-                onBackspace = { pendingLetter = null},
+                onBackspace = { pendingLetter = null },
                 onEnter = {
                     val letter = pendingLetter
                     if (letter != null) {
@@ -97,11 +152,9 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
                     pendingLetter = null
                 }
             )
-
         }
     }
-
-
+}
 
 @Composable
 fun OnScreenKeyboard(

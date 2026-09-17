@@ -20,6 +20,9 @@ class HangmanViewModel(application: Application) : AndroidViewModel(application)
     var usedLives by mutableStateOf(0)
         private set
 
+    var hintUsed by mutableStateOf(false)
+        private set
+
     var guessedLetters by mutableStateOf(setOf<Char>())
         private set
 
@@ -87,10 +90,29 @@ class HangmanViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun useHint() {
+        if (isGameOver()) return
+        if (usedLives >= maxLives) return
+        if (hintUsed) return
+
+        val availableLetters = targetWord
+            .toSet()
+            .filter { it !in guessedLetters }
+
+        if (availableLetters.isEmpty()) return
+
+        val hintLetter = availableLetters.random()
+
+        guessedLetters = guessedLetters + hintLetter
+        usedLives++
+        hintUsed = true
+    }
+
     fun restart() {
         targetWord = pickWord(difficulty, excludeWord = targetWord)
         guessedLetters = setOf<Char>()
         usedLives = 0
+        hintUsed = false
     }
 
 
