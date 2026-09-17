@@ -70,4 +70,10 @@ class HangmanViewModel(application: Application) : AndroidViewModel(application)
         guessedLetters = setOf<Char>()
         usedLives = 0
     }
+
+
+    fun letterStatus(letter: Char): String {
+        if (letter !in guessedLetters) return "unguessed"
+        return if (letter in targetWord) "correct" else "wrong"
+    }
 }
