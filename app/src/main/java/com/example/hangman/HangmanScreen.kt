@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -22,10 +23,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.graphics.Color
 
+
+private const val ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 @Composable
 fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
-    var letterInput by remember { mutableStateOf("") }
+    var pendingLetter by remember { mutableStateOf<Char?>(null) }
 
     Column(modifier = Modifier.fillMaxSize().padding(40.dp)) {
 
@@ -50,10 +55,6 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
             modifier = Modifier.padding(top = 16.dp)
         )
 
-        Text(
-            text = "Your guessed letters: ${viewModel.guessedLetters.sorted().joinToString(", ")}",
-            modifier = Modifier.padding(top = 8.dp)
-        )
 
         if (viewModel.isGameOver()) {
             Text(
@@ -64,39 +65,93 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
             Button(
                 onClick = {
                     viewModel.restart()
-                    letterInput = ""
+                    pendingLetter = null
                           },
                 modifier = Modifier.padding(top = 16.dp)
             ){
                 Text("Play again")
             }
 
-        } else {
-            TextField(
-                value = letterInput,
-                onValueChange = {newValue ->
-                    if (newValue.length <= 1) {
-                        if (newValue.isEmpty() || newValue[0].isLetter()) {
-                            letterInput = newValue
-                        }
-                    }
-                },
-                singleLine = true,
-                modifier = Modifier.padding(top = 24.dp)
-            )
-            Button(
-                onClick = {
-                    val letter = letterInput.firstOrNull()
+        } else
+            OnScreenKeyboard(
+                viewModel = viewModel,
+                pendingLetter = pendingLetter,
+                onLetterTap = { pendingLetter = it },
+                onBackspace = { pendingLetter = null},
+                onEnter = {
+                    val letter = pendingLetter
                     if (letter != null) {
                         viewModel.guessLetter(letter)
                     }
-                    letterInput = ""
-                },
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text("Submit")
-            }
+                    pendingLetter = null
+                }
+            )
 
+        }
+    }
+
+
+
+@Composable
+fun OnScreenKeyboard(
+    viewModel: HangmanViewModel,
+    pendingLetter: Char?,
+    onLetterTap: (Char) -> Unit,
+    onBackspace: () -> Unit,
+    onEnter: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        for (row in ALPHABET.chunked(9)) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                for (letter in row) {
+                    val status = viewModel.letterStatus(letter)
+                    val isSelected = letter == pendingLetter
+
+                    val colors = when {
+                        status == "correct" -> ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF6AAA64),
+                            contentColor = Color.White,
+                            disabledContainerColor = Color(0xFF6AAA64),
+                            disabledContentColor = Color.White
+                        )
+                        status == "wrong" -> ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF787C7E),
+                            contentColor = Color.White,
+                            disabledContainerColor = Color(0xFF787C7E),
+                            disabledContentColor = Color.White
+                        )
+                        isSelected -> ButtonDefaults.buttonColors(containerColor = Color(0xFFC9B458))
+                        else -> ButtonDefaults.buttonColors()
+                    
+                    }
+                    Button(
+                        onClick = { onLetterTap(letter) },
+                        enabled = status == "unguessed",
+                        colors = colors,
+                        contentPadding = PaddingValues(4.dp),
+                        modifier = Modifier.weight(1f).padding(1.dp)
+                    ) {
+                        Text(letter.uppercase())
+                    }
+                }
+            }
+        }
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+            Button(
+                onClick = onBackspace,
+                enabled = pendingLetter != null,
+                modifier = Modifier.weight(1f).padding(1.dp)
+            ) {
+                Text("⌫")
+            }
+            Button(
+                onClick = onEnter,
+                enabled = pendingLetter != null,
+                modifier = Modifier.weight(1f).padding(1.dp)
+            ) {
+                Text("Enter")
+            }
         }
     }
 }
