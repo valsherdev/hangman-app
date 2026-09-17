@@ -43,6 +43,17 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
+        Text(
+            text = "Pick your level of difficulty:",
+            fontSize = 16.sp,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        DifficultySelector(
+            currentDifficulty = viewModel.difficulty,
+            onSelect = { viewModel.pickDifficulty(it) }
+        )
+
         HangmanDrawing(
             livesRemaining = viewModel.getLivesRemaining(),
             maxLives = viewModel.maxLives
@@ -206,6 +217,38 @@ fun OnScreenKeyboard(
                 Text("Enter")
             }
         }
+    }
+}
+
+
+@Composable
+fun DifficultySelector(currentDifficulty: String, onSelect: (String) -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+        DifficultyButton("easy", "Easy", currentDifficulty, onSelect)
+        DifficultyButton("medium", "Medium", currentDifficulty, onSelect)
+        DifficultyButton("hard", "Hard", currentDifficulty, onSelect)
+    }
+}
+
+
+@Composable
+fun DifficultyButton(
+    value: String,
+    label: String,
+    currentDifficulty: String,
+    onSelect: (String) -> Unit
+) {
+    val isSelected = value == currentDifficulty
+    Button(
+        onClick = { onSelect(value) },
+        modifier = Modifier.padding(2.dp),
+        colors = if (isSelected) {
+            ButtonDefaults.buttonColors()
+        } else {
+            ButtonDefaults.buttonColors(containerColor = Color.LightGray)
+        }
+    ) {
+        Text(label)
     }
 }
 

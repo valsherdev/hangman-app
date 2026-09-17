@@ -5,13 +5,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
+
 
 class HangmanViewModel(application: Application) : AndroidViewModel(application) {
 
 
-    private val words: List<String> = loadWords()
-    var targetWord by mutableStateOf(words.random())
+    private val words: List<String> = loadWords().filter { it.length >= 3 }
+
+    var difficulty by mutableStateOf("medium")
+        private set
+    var targetWord by mutableStateOf(pickWord(difficulty))
 
     val maxLives = 6
     var usedLives by mutableStateOf(0)
@@ -30,6 +33,25 @@ class HangmanViewModel(application: Application) : AndroidViewModel(application)
         return inputStream.bufferedReader().readLines()
             .map { it.trim().lowercase() }
             .filter { it.isNotEmpty() }
+    }
+
+
+    private fun pickWord(difficulty: String, excludeWord: String? = null): String {
+        val lengthFiltered = when (difficulty) {
+            "easy" -> words.filter { it.length in 3..4 }
+            "hard" -> words.filter { it.length >= 8 }
+            else -> words.filter { it.length in 5..7 }
+        }.ifEmpty { words }
+
+        val candidates = lengthFiltered.filter { it != excludeWord }.ifEmpty { lengthFiltered }
+        return candidates.random()
+    }
+
+
+    fun pickDifficulty(newDifficulty: String) {
+        difficulty = newDifficulty
+        restart()
+
     }
 
     fun getDisplayWord(): String {
@@ -79,7 +101,12 @@ class HangmanViewModel(application: Application) : AndroidViewModel(application)
 
         if (availableLetters.isEmpty()) return
 
-        val hintLetter = availableLetters.random()
+        val singleOccurrenceLetters = availableLetters.filter { letter ->
+            targetWord.count { it == letter } == 1
+        }
+        val hintPool = singleOccurrenceLetters.ifEmpty { availableLetters }
+
+        val hintLetter = hintPool.random()
 
         guessedLetters = guessedLetters + hintLetter
         usedLives++
@@ -87,7 +114,7 @@ class HangmanViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun restart() {
-        targetWord = words.random()
+        targetWord = pickWord(difficulty, excludeWord = targetWord)
         guessedLetters = setOf<Char>()
         usedLives = 0
         hintUsed = false
