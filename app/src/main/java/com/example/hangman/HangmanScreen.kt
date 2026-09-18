@@ -46,18 +46,20 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
 
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
             color = Color(0xFFEAF2F8),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(16.dp)
         ) {
                 Text(
                     text = "HANGMAN",
-                    fontSize = 42.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 3.sp,
-                    color = Color(0xFF222222),
+                    fontSize = 52.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 5.sp,
+                    color = Color(0xFF243B64),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp)
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp)
                 )
             }
         Spacer(modifier = Modifier.height(10.dp))
@@ -77,7 +79,7 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
         )
 
         Card(
-            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            modifier = Modifier.fillMaxWidth().weight(1f).padding(top = 6.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color(0xFFEAF2F8)
             )
@@ -90,8 +92,9 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
             )
             {
                 HangmanDrawing(
-                livesRemaining = viewModel.getLivesRemaining(),
-                maxLives = viewModel.maxLives
+                    livesRemaining = viewModel.getLivesRemaining(),
+                    maxLives = viewModel.maxLives,
+                    modifier = Modifier.fillMaxWidth().weight(1f)
                 )
 
                 Text(
@@ -123,7 +126,7 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
                 },
                 text = {
                     Text("A hint reveals one random letter from the word. " +
-                            "Using a hint costs one heart. " +
+                            "Using a hint costs one heart, so you need at least two hearts to use it. " +
                             "You only have 1 hint.")
                 },
                 confirmButton = {
@@ -188,7 +191,7 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
                         viewModel.useHint()
                     },
                     enabled = !viewModel.hintUsed &&
-                            viewModel.getLivesRemaining() > 0,
+                            viewModel.getLivesRemaining() > 1,
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("💡 Hint")
@@ -319,13 +322,13 @@ fun DifficultyButton(
 }
 
 @Composable
-fun HangmanDrawing(livesRemaining: Int, maxLives: Int)
+fun HangmanDrawing(livesRemaining: Int, maxLives: Int, modifier: Modifier = Modifier)
 {
     val mistakes = maxLives - livesRemaining
     val hangmanColor = MaterialTheme.colorScheme.onBackground
 
     Canvas(
-        modifier = Modifier.fillMaxWidth().height(300.dp))
+        modifier = modifier)
     {
         val strokeWidth = 12f
 
