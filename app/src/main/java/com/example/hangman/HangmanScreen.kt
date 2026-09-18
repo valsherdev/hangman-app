@@ -16,6 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -27,7 +28,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.layout.width
-
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Arrangement
 
 private const val ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 @Composable
@@ -35,18 +43,32 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
     var pendingLetter by remember { mutableStateOf<Char?>(null) }
     var showHintInfo by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(40.dp)) {
+    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
 
-        Text(
-            text = "HANGMAN",
-            fontSize = 32.sp,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFFEAF2F8),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+                Text(
+                    text = "HANGMAN",
+                    fontSize = 42.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 3.sp,
+                    color = Color(0xFF222222),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp)
+                )
+            }
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = "Pick your level of difficulty:",
             fontSize = 16.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color(0xFF444444),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 0.dp)
         )
 
         DifficultySelector(
@@ -54,20 +76,42 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
             onSelect = { viewModel.pickDifficulty(it) }
         )
 
-        HangmanDrawing(
-            livesRemaining = viewModel.getLivesRemaining(),
-            maxLives = viewModel.maxLives
-        )
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFEAF2F8)
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            )
+            {
+                HangmanDrawing(
+                livesRemaining = viewModel.getLivesRemaining(),
+                maxLives = viewModel.maxLives
+                )
 
-        Text(
-            text = viewModel.getDisplayWord()
-        )
+                Text(
+                    text = viewModel.getDisplayWord(),
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 4.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
+                )
 
-        Text(
-            text = "❤️".repeat(viewModel.getLivesRemaining()) +
-                    "🖤".repeat(viewModel.maxLives - viewModel.getLivesRemaining()),
-            modifier = Modifier.padding(top = 16.dp)
-        )
+                Text(
+                    text = "❤️".repeat(viewModel.getLivesRemaining()) +
+                            "🖤".repeat(viewModel.maxLives - viewModel.getLivesRemaining()),
+                    fontSize = 22.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                )
+            }
+        }
 
         if (showHintInfo) {
             AlertDialog(
@@ -96,19 +140,42 @@ fun HangmanScreen(viewModel: HangmanViewModel = viewModel()) {
 
         if (viewModel.isGameOver()) {
             Text(
-                text = if (viewModel.isWon()) "You won!" else "You lost! The word was: ${viewModel.targetWord}",
-                modifier = Modifier.padding(top = 24.dp)
+                text = if (viewModel.isWon()) {
+                    "🎉 YOU WON! 🎉" }
+                else {
+                    "💀 GAME OVER 💀" },
+                fontSize = 32.sp,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF222222),
+                modifier = Modifier.fillMaxWidth().padding(top = 24.dp)
             )
 
-            Button(
-                onClick = {
-                    viewModel.restart()
-                    pendingLetter = null
-                },
-                modifier = Modifier.padding(top = 16.dp)
+            if (!viewModel.isWon()) {
+                Text(
+                    text = "The word was: ${viewModel.targetWord}",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFF555555),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                )}
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text("Play again")
+                Button(
+                    onClick = {
+                        viewModel.restart()
+                        pendingLetter = null
+                    },
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text("Play again")
+                }
             }
+
 
         } else {
             Row(
@@ -223,13 +290,12 @@ fun OnScreenKeyboard(
 
 @Composable
 fun DifficultySelector(currentDifficulty: String, onSelect: (String) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+    Row(modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp), horizontalArrangement = Arrangement.Center) {
         DifficultyButton("easy", "Easy", currentDifficulty, onSelect)
         DifficultyButton("medium", "Medium", currentDifficulty, onSelect)
         DifficultyButton("hard", "Hard", currentDifficulty, onSelect)
     }
 }
-
 
 @Composable
 fun DifficultyButton(
@@ -253,105 +319,95 @@ fun DifficultyButton(
 }
 
 @Composable
-fun HangmanDrawing(
-    livesRemaining: Int,
-    maxLives: Int
-) {
+fun HangmanDrawing(livesRemaining: Int, maxLives: Int)
+{
     val mistakes = maxLives - livesRemaining
     val hangmanColor = MaterialTheme.colorScheme.onBackground
 
     Canvas(
-        modifier = Modifier.fillMaxWidth().height(250.dp)
-    ) {
+        modifier = Modifier.fillMaxWidth().height(300.dp))
+    {
+        val strokeWidth = 12f
 
-        val strokeWidth = 8f
-
-        drawLine(
-            color = hangmanColor,
-            start = Offset(40f, size.height - 20f),
-            end = Offset(size.width - 40f, size.height - 20f),
-            strokeWidth = strokeWidth,
-            cap = StrokeCap.Round
-        )
+        val manX = size.width * 0.7f
 
         drawLine(
             color = hangmanColor,
-            start = Offset(100f, size.height - 20f),
-            end = Offset(100f, 30f),
+            start = Offset(size.width * 0.15f, size.height - 25f),
+            end = Offset(size.width * 0.85f, size.height - 25f),
             strokeWidth = strokeWidth,
             cap = StrokeCap.Round
         )
-
         drawLine(
             color = hangmanColor,
-            start = Offset(100f, 30f),
-            end = Offset(size.width * 0.65f, 30f),
+            start = Offset(size.width * 0.30f, size.height - 25f),
+            end = Offset(size.width * 0.30f, 30f),
             strokeWidth = strokeWidth,
             cap = StrokeCap.Round
         )
-
         drawLine(
             color = hangmanColor,
-            start = Offset(size.width * 0.65f, 30f),
-            end = Offset(size.width * 0.65f, 75f),
+            start = Offset(size.width * 0.30f, 30f),
+            end = Offset(manX, 30f),
             strokeWidth = strokeWidth,
             cap = StrokeCap.Round
         )
-
+        drawLine(
+            color = hangmanColor,
+            start = Offset(manX, 30f),
+            end = Offset(manX, 180f),
+            strokeWidth = strokeWidth,
+            cap = StrokeCap.Round
+        )
         if (mistakes >= 1) {
             drawCircle(
                 color = hangmanColor,
-                center = Offset(size.width * 0.65f, 105f),
-                radius = 25f,
+                center = Offset(manX, 230f),
+                radius = 50f,
                 style = Stroke(width = strokeWidth)
             )
         }
-
         if (mistakes >= 2) {
             drawLine(
                 color = hangmanColor,
-                start = Offset(size.width * 0.65f, 130f),
-                end = Offset(size.width * 0.65f, 205f),
+                start = Offset(manX, 280f),
+                end = Offset(manX, 375f),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
         }
-
         if (mistakes >= 3) {
             drawLine(
                 color = hangmanColor,
-                start = Offset(size.width * 0.65f, 155f),
-                end = Offset(size.width * 0.57f, 175f),
+                start = Offset(manX, 300f),
+                end = Offset(manX - 80f, 355f),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
         }
-
         if (mistakes >= 4) {
             drawLine(
                 color = hangmanColor,
-                start = Offset(size.width * 0.65f, 155f),
-                end = Offset(size.width * 0.73f, 175f),
+                start = Offset(manX, 300f),
+                end = Offset(manX + 80f, 355f),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
         }
-
         if (mistakes >= 5) {
             drawLine(
                 color = hangmanColor,
-                start = Offset(size.width * 0.65f, 205f),
-                end = Offset(size.width * 0.60f, 260f),
+                start = Offset(manX, 375f),
+                end = Offset(manX - 70f, 455f),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
         }
-
         if (mistakes >= 6) {
             drawLine(
                 color = hangmanColor,
-                start = Offset(size.width * 0.65f, 205f),
-                end = Offset(size.width * 0.70f, 260f),
+                start = Offset(manX, 375f),
+                end = Offset(manX + 70f, 455f),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
