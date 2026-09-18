@@ -93,7 +93,7 @@ class HangmanViewModel(application: Application) : AndroidViewModel(application)
     fun useHint() {
         if (isGameOver()) return
         if (usedLives >= maxLives) return
-        if (hintUsed) return
+        if (hintUsed || getLivesRemaining() <= 1) return
 
         val availableLetters = targetWord
             .toSet()
